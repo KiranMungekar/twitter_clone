@@ -5,8 +5,10 @@ import { api } from "~/utils/api";
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
+  const { data } = api.example.getAll.useQuery();
   const user = useUser();
+
+  console.log(data);
 
   return (
     <>
@@ -19,6 +21,9 @@ const Home: NextPage = () => {
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
           {!user.isSignedIn && <SignInButton />}
           {!!user.isSignedIn && <SignOutButton />}
+        </div>
+        <div>
+          {data?.map(post => (<h1 key={post.id}>{post.content}</h1>))}
         </div>
       </main>
     </>
