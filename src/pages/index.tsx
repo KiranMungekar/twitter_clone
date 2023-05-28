@@ -9,6 +9,8 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Image from "next/image";
 
+import LoadingPage from '../components/loading';
+
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
@@ -41,19 +43,30 @@ const PostViewComponent = (props: PostWithUser) => {
       <span>{`@${author.username}`}</span>
       <span>{`- ${dayjs(post.createdAt).fromNow()}`}</span>
     </div>
-      <span>{post.content}</span>
+      <span className="text-xl">{post.content}</span>
   </div>
   </div>;
 }
 
-const Home: NextPage = () => {
+const FeedComponent = () => {
   const { data, isLoading } = api.posts.getAll.useQuery();
-  const user = useUser();
-
-  if (isLoading) return <div>Loading.....</div>
+  
+  if (isLoading) return <LoadingPage size={60}/>
 
   if(!data) return <div> Something went wrong! </div>
 
+  return (<div className="flex flex-col">
+  {[...data]?.map((data) => <PostViewComponent key={data.post.id} {...data}/>)}
+</div>)
+}
+
+const Home: NextPage = () => {
+  const {isLoaded: userLoaded, isSignedIn} = useUser();
+
+  if(!userLoaded) return <></>
+
+  //Start fetching data, so Feed component can use cache data
+  api.posts.getAll.useQuery();
   return (
     <>
       <Head>
@@ -64,12 +77,10 @@ const Home: NextPage = () => {
       <main className="flex justify-center h-screen">
         <div className="bg-blue-500 w-full h-full md:max-w-2xl border-x border-slate-400">
           <div className="flex border-b border-slate-400 p-4">
-              {!user.isSignedIn && <SignInButton />}
-              {!!user.isSignedIn && <CreatePostWizard />}
+              {!isSignedIn && <SignInButton />}
+              {!!isSignedIn && <CreatePostWizard />}
           </div>
-          <div className="flex flex-col">
-            {[...data]?.map((data) => <PostViewComponent key={data.post.id} {...data}/>)}
-          </div>
+          <FeedComponent />
         </div>
       </main>
     </>
