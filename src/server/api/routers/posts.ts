@@ -1,5 +1,6 @@
 import { clerkClient } from "@clerk/nextjs";
 import type { User } from "@clerk/nextjs/dist/server";
+import { Post } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
@@ -24,7 +25,7 @@ export const postRouter = createTRPCRouter({
     });
 
     const users = (await clerkClient.users.getUserList({
-      userId: posts.map(post => post.authorId),
+      userId: posts.map((post: Post) => post.authorId),
       limit: 100,
     })).map(filterUsersForClient);
 
