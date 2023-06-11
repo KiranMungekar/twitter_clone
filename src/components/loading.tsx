@@ -1,3 +1,5 @@
+import react from 'react';
+
 export const LoadingSpinner = (props : {size?: number}) => {
 return (<div role="status">
 <svg aria-hidden="true" 

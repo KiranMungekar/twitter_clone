@@ -1,3 +1,4 @@
+import react, { useState } from 'react';
 import { type NextPage } from "next";
 import Head from "next/head";
 
@@ -11,10 +12,30 @@ import Image from "next/image";
 
 import LoadingPage from '../components/loading';
 
+
+import InputEmoji from 'react-input-emoji';
+
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user } = useUser();
+  const [ input, setInput ] = useState("");
+  const ctx = api.useContext();
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.posts.getAll.invalidate()
+    } 
+  });
+  
+  const handleOnEnter = (text: any) => {
+    console.log('enter', text)
+  }
+
+  const handleCreatePost = () => {
+    mutate({ content: input });
+  }
+  
   if(!user) return null;
   return <div className="flex w-full gap-3">
     <Image 
@@ -22,7 +43,24 @@ const CreatePostWizard = () => {
       alt='Profile Image' 
       width={64} height={64} 
       className='h-16 w-16 rounded-full' />
-    <input placeholder="Enter your thoughts!" className="grow px-2 bg-transparent outline-none"/>
+      <input placeholder="Enter your Emotions!" 
+        className="grow px-2 bg-transparent outline-none"
+        type='text'
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+      />
+      {/* <InputEmoji 
+        className="grow px-2 bg-transparent outline-none"
+        type='text'
+        value={input}
+        onChange={setInput}
+        clearOnEnter
+        onEnter={handleOnEnter}
+        placeholder={'Select some emojis!'}
+        disabled={isPosting}
+      /> */}
+      
+      <button onClick={() => handleCreatePost()}>Post</button>
   </div>
 }
 
@@ -56,7 +94,7 @@ const FeedComponent = () => {
   if(!data) return <div> Something went wrong! </div>
 
   return (<div className="flex flex-col">
-  {[...data]?.map((data) => <PostViewComponent key={data.post.id} {...data}/>)}
+  {data?.map((data) => <PostViewComponent key={data.post.id} {...data}/>)}
 </div>)
 }
 

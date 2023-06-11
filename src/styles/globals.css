@@ -5,3 +5,27 @@
 body{
     @apply bg-black text-slate-100;
 }
+.react-emoji-picker--container {
+    position: absolute;
+    top: 750%!important
+}
+/* .react-input-emoji--container{
+    display: none!important;
+} */
+.react-input-emoji--container{
+    background: transparent!important;
+    border: none!important;
+    color: while!important;
+}
+.react-input-emoji--input {
+    background: transparent!important;
+}
+.react-input-emoji--placeholder {
+    color: #e5e7eb!important;
+}
+.react-input-emoji--button__show svg {
+    fill: #e5e7eb!important;
+}
+.react-input-emoji--button--icon svg {
+    fill: #e5e7eb!important;
+}
