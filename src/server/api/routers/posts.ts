@@ -5,6 +5,17 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure, publicProcedure } from "~/server/api/trpc";
 
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(3, "60 s"),
+  analytics: true,
+  prefix: "@upstash/ratelimit",
+});
+
 const filterUsersForClient = (user: User) => {
   return {
     id: user.id, username: user.username, profilePicture: user.profileImageUrl,
@@ -52,6 +63,11 @@ export const postRouter = createTRPCRouter({
     content: z.string().emoji().min(1).max(280)
   })).mutation(async ({ctx, input}) => {
     const authorId = ctx.currentUserId;
+
+    const { success } = await ratelimit.limit(authorId);
+
+    if(!success) throw new TRPCError({ code : "TOO_MANY_REQUESTS"})
+
     const post = await ctx.prisma.post.create({
       data: {
         authorId,
